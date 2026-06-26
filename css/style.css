@@ -1,0 +1,407 @@
+:root {
+  /* GitHub-dark inspired palette */
+  --bg: #0d1117;
+  --bg-inset: #010409;
+  --bg-panel: #161b22;
+  --bg-elev: #21262d;
+  --border: #30363d;
+  --border-muted: #21262d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --accent: #2f81f7;
+  --accent-soft: rgba(47, 129, 247, 0.15);
+  --green: #238636;
+  --green-hi: #2ea043;
+  --radius: 6px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+/* Sticky-footer scaffold: footer hugs the viewport bottom when content is
+   short, but sits below the content when everything is expanded. */
+body { display: flex; flex-direction: column; min-height: 100vh; }
+.layout { flex: 1 0 auto; }
+.footer { flex-shrink: 0; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Topbar ------------------------------------------------------------------ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+.brand { display: flex; align-items: center; gap: 0.8rem; }
+.logo { font-size: 1.7rem; }
+.topbar h1 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+.tagline { margin: 0.1rem 0 0; color: var(--text-dim); font-size: 0.85rem; }
+.repo-link {
+  white-space: nowrap;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.repo-link:hover { border-color: var(--text-dim); text-decoration: none; background: var(--bg-elev); }
+
+/* Layout ------------------------------------------------------------------ */
+.layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) minmax(340px, 460px);
+  grid-template-areas: "nav form out";
+  gap: 1rem;
+  /* Explicit width (not margin:auto) so the layout never shrinks to its
+     content width — this keeps column widths stable as content changes. */
+  width: 100%;
+  max-width: 1480px;
+  align-self: center;
+  margin: 1rem 0;
+  padding: 0 1.25rem;
+  align-items: start;
+}
+.sidebar { grid-area: nav; }
+.form-panel { grid-area: form; }
+.output-panel { grid-area: out; }
+
+/* Below the wide breakpoint the persistent sidebar is replaced by a burger
+   menu, so it never overlaps the form. Form + output sit side by side... */
+@media (max-width: 1200px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+    grid-template-areas: "form out";
+  }
+  /* Descendant selectors (higher specificity) so these win over the base
+     .burger / .sidebar rules that appear later in the stylesheet. */
+  .topbar .burger { display: inline-flex; }
+  .layout .sidebar {
+    position: fixed;
+    top: 56px;
+    left: 12px;
+    z-index: 50;
+    width: 250px;
+    max-height: 75vh;
+    overflow: auto;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.8rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: none;
+  }
+  .layout .sidebar.open { display: block; }
+}
+/* ...and stack on the narrowest screens. */
+@media (max-width: 820px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "form" "out";
+  }
+  .layout .output-panel { position: static; }
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem;
+  min-width: 0;
+}
+
+/* Sidebar (category browser) ---------------------------------------------- */
+.sidebar { position: sticky; top: 1rem; align-self: start; }
+.sidebar-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin: 0 0 0.5rem;
+  padding: 0 0.5rem;
+}
+.nav { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.nav-link {
+  display: block;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  border-left: 2px solid transparent;
+}
+.nav-link:hover { background: var(--bg-elev); color: var(--text); text-decoration: none; }
+.nav-link.active { background: var(--bg-elev); color: var(--text); border-left-color: var(--accent); font-weight: 500; }
+
+/* Output panel stays in view */
+.output-panel { position: sticky; top: 1rem; }
+
+/* Toolbar / search -------------------------------------------------------- */
+.toolbar { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
+.search {
+  flex: 1;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font);
+}
+input:focus, select:focus, .search:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Buttons ----------------------------------------------------------------- */
+.btn {
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.82rem;
+  font-family: var(--font);
+  white-space: nowrap;
+}
+.btn:hover { background: #30363d; border-color: var(--text-dim); }
+.btn-primary { background: var(--green); border-color: rgba(240, 246, 252, 0.1); color: #fff; }
+.btn-primary:hover { background: var(--green-hi); border-color: rgba(240, 246, 252, 0.1); }
+.btn.ok { background: var(--green); border-color: var(--green); color: #fff; }
+.btn-ghost { background: transparent; }
+.btn-ghost:hover { background: var(--bg-elev); }
+
+/* Burger button — only shown on smaller screens (see layout media queries). */
+.burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 38px;
+  height: 38px;
+  font-size: 1.2rem;
+  line-height: 1;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.burger:hover { border-color: var(--text-dim); }
+
+/* Collapsible categories -------------------------------------------------- */
+.cat {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
+  background: var(--bg-panel);
+}
+.cat.hidden { display: none; }
+.cat-summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  user-select: none;
+}
+.cat-summary::-webkit-details-marker { display: none; }
+.cat-summary::before {
+  content: "";
+  width: 0; height: 0;
+  border-left: 5px solid var(--text-dim);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.15s ease;
+  flex: none;
+}
+.cat[open] > .cat-summary::before { transform: rotate(90deg); }
+.cat[open] > .cat-summary { border-bottom: 1px solid var(--border); }
+.cat-name { margin-right: auto; }
+.cat-count {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+}
+.cat-body { padding: 0.2rem 0.8rem 0.6rem; }
+.f-section-note { margin: 0.5rem 0; color: var(--text-dim); font-size: 0.8rem; }
+
+/* Form rows --------------------------------------------------------------- */
+.f-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--border-muted);
+}
+.f-row > * { min-width: 0; }
+.cat-body .f-row:first-child { border-top: none; }
+.f-row.hidden { display: none; }
+.f-label-top { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.f-label-text { font-weight: 500; }
+.f-help { color: var(--text-dim); font-size: 0.8rem; margin-top: 0.1rem; }
+.f-ctrlcol { display: flex; justify-content: flex-end; }
+
+.f-badges { display: inline-flex; gap: 0.3rem; }
+.badge {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.badge-creation { color: #d29922; border-color: rgba(187, 128, 9, 0.4); background: rgba(187, 128, 9, 0.1); }
+
+/* Controls ---------------------------------------------------------------- */
+.f-select, .f-number, .f-text {
+  padding: 0.35rem 0.5rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font);
+}
+.f-select, .f-text { width: 100%; }
+.f-range { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; width: 100%; }
+.f-slider { flex: 1; min-width: 0; accent-color: var(--accent); }
+.f-number { width: 74px; flex: none; text-align: right; }
+/* Number fields without a slider (e.g. server settings) stay right-aligned and
+   get a touch more room for large values. */
+.f-range .f-number:only-child { width: 110px; }
+.f-toggle { width: 38px; height: 20px; cursor: pointer; accent-color: var(--green); }
+
+/* Meta block (reuses .cat) */
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; padding-top: 0.4rem; }
+@media (max-width: 520px) { .meta-grid { grid-template-columns: 1fr; } }
+.meta-field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.82rem; }
+.meta-field small { color: var(--text-dim); }
+.meta-field input, .meta-field select {
+  padding: 0.4rem 0.5rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+/* Output panel ------------------------------------------------------------ */
+.tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+.tab {
+  cursor: pointer;
+  padding: 0.4rem 0.7rem;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-family: var(--font);
+}
+.tab:hover { color: var(--text); background: var(--bg-elev); }
+.tab.active { color: var(--text); background: var(--bg-elev); border-color: var(--border); font-weight: 600; }
+
+.includeall {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.8rem;
+}
+.includeall input { accent-color: var(--green); }
+
+.pane { display: none; }
+.pane.active { display: block; }
+.pane-desc { margin: 0 0 0.7rem; color: var(--text-dim); font-size: 0.82rem; }
+.pane-desc code { color: var(--text); }
+
+.actions { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+.count { color: var(--text-dim); font-size: 0.78rem; margin-left: auto; }
+
+pre {
+  margin: 0;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.8rem;
+  max-height: 62vh;
+  overflow: auto;
+}
+code { font-family: var(--mono); font-size: 0.78rem; color: var(--text); white-space: pre; }
+code.wrap { white-space: pre-wrap; word-break: break-all; }
+
+/* Footer ------------------------------------------------------------------ */
+.footer {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  padding: 1.4rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+/* Roles editor ------------------------------------------------------------ */
+.role-bar { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.5rem 0 0.7rem; }
+.role-default { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--text-dim); margin-left: auto; }
+.role-default .f-select { width: auto; }
+.role-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.role-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+.role-card-summary {
+  cursor: pointer; list-style: none; display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+}
+.role-card-summary::-webkit-details-marker { display: none; }
+.role-card-summary::before {
+  content: ""; width: 0; height: 0;
+  border-left: 5px solid var(--text-dim); border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+  transition: transform 0.15s ease; flex: none;
+}
+.role-card[open] > .role-card-summary::before { transform: rotate(90deg); }
+.role-card[open] > .role-card-summary { border-bottom: 1px solid var(--border); }
+.role-card-title { display: flex; align-items: center; gap: 0.5rem; margin-right: auto; min-width: 0; }
+.role-code { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.4rem; font-family: var(--mono); font-size: 0.78rem; }
+.role-card-name { color: var(--text-dim); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.role-remove { padding: 0.2rem 0.55rem; font-size: 0.75rem; }
+
+.role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; padding: 0.7rem; }
+@media (max-width: 600px) { .role-grid { grid-template-columns: 1fr; } }
+.role-field { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; color: var(--text-dim); min-width: 0; }
+.role-field-wide { grid-column: 1 / -1; }
+.role-field .f-text, .role-field .f-select { width: 100%; }
+.role-field .f-toggle { align-self: start; }
+.role-num { width: 100%; text-align: left; }
+.role-minsize { display: flex; gap: 0.4rem; min-width: 0; }
+.role-minsize .role-num { flex: 1; width: auto; min-width: 0; text-align: center; }
+
+.role-priv-title { margin: 0; padding: 0 0.7rem; font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
+.role-privs {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.2rem 0.6rem; padding: 0.5rem 0.7rem 0.8rem;
+}
+.role-priv { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
+.role-priv input { accent-color: var(--green); }
+.role-priv span { font-family: var(--mono); font-size: 0.74rem; }
+
+.hidden { display: none !important; }

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VS-Config-Generator</title>
+  <meta name="description" content="Generate configurations for your Vintage Story server — copy, download or share as a self-contained token." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛏️</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <button id="burger" class="burger" type="button" aria-label="Toggle categories" aria-expanded="false">☰</button>
+      <span class="logo">⛏️</span>
+      <div>
+        <h1>VS-Config-Generator</h1>
+        <p class="tagline">Build a configuration for your server — copy it, download it, or share it as a token.</p>
+      </div>
+    </div>
+    <a class="repo-link" href="https://github.com/MErevGe/VintageStory-Server" target="_blank" rel="noopener">Server project ↗</a>
+  </header>
+
+  <main class="layout">
+    <!-- Left: category browser -->
+    <nav class="sidebar">
+      <div class="sidebar-inner">
+        <h2 class="sidebar-title">Categories</h2>
+        <ul id="nav" class="nav"></ul>
+      </div>
+    </nav>
+
+    <!-- Middle: the settings form -->
+    <section class="panel form-panel">
+      <div class="toolbar">
+        <input id="search" type="search" class="search" placeholder="Search settings or categories…" autocomplete="off" />
+        <button id="btn-expand" type="button" class="btn btn-ghost" title="Expand/collapse all">Toggle all</button>
+        <button id="btn-reset" type="button" class="btn btn-ghost">Reset</button>
+      </div>
+
+      <details class="cat meta" id="section-meta">
+        <summary class="cat-summary"><span class="cat-name">Server config options</span></summary>
+        <div class="cat-body">
+          <div class="meta-grid">
+            <label class="meta-field">
+              <span>World name</span>
+              <input id="meta-worldname" type="text" placeholder="My World" />
+            </label>
+            <label class="meta-field">
+              <span>Seed <small>(optional)</small></span>
+              <input id="meta-seed" type="text" placeholder="random if empty" />
+            </label>
+            <label class="meta-field">
+              <span>Playstyle</span>
+              <select id="meta-playstyle">
+                <option value="surviveandbuild">Survive and Build</option>
+                <option value="wildernesssurvival">Wilderness Survival</option>
+                <option value="exploration">Exploration</option>
+                <option value="creativebuilding">Creative Building</option>
+                <option value="homosapiens">Homo Sapiens</option>
+              </select>
+            </label>
+            <label class="meta-field">
+              <span>Map height (MapSizeY)</span>
+              <input id="meta-mapsizey" type="number" value="256" min="128" max="1024" step="1" />
+            </label>
+          </div>
+        </div>
+      </details>
+
+      <div id="server" class="form"></div>
+      <div id="form" class="form"></div>
+      <div id="roles" class="form"></div>
+    </section>
+
+    <!-- Right: the generated output -->
+    <aside class="panel output-panel">
+      <div class="tabs">
+        <button class="tab active" data-tab="snippet" type="button">Snippet</button>
+        <button class="tab" data-tab="server" type="button">serverconfig.json</button>
+        <button class="tab" data-tab="token" type="button">Token</button>
+        <button class="tab" data-tab="permalink" type="button">Permalink</button>
+      </div>
+
+      <label class="includeall">
+        <input id="opt-includeall" type="checkbox" />
+        <span>Include all values in snippet / serverconfig (token always full)</span>
+      </label>
+
+      <div id="pane-snippet" class="pane active">
+        <p class="pane-desc">The <code>worldConfiguration</code> object. Paste it into your server's world config.</p>
+        <div class="actions">
+          <button class="btn btn-primary" data-copy="snippet" type="button">Copy</button>
+          <button class="btn btn-ghost" data-download="snippet" type="button">Download .json</button>
+          <span id="out-count" class="count"></span>
+        </div>
+        <pre><code id="out-snippet"></code></pre>
+      </div>
+
+      <div id="pane-server" class="pane">
+        <p class="pane-desc">A ready-to-merge <code>WorldConfig</code> block for your <code>serverconfig.json</code>.</p>
+        <div class="actions">
+          <button class="btn btn-primary" data-copy="server" type="button">Copy</button>
+          <button class="btn btn-ghost" data-download="server" type="button">Download serverconfig.json</button>
+        </div>
+        <pre><code id="out-server"></code></pre>
+      </div>
+
+      <div id="pane-token" class="pane">
+        <p class="pane-desc">A self-contained token carrying the <strong>full</strong> config. Paste it into a compose variable; the
+          <a href="https://github.com/MErevGe/VintageStory-Server" target="_blank" rel="noopener">server project</a>
+          decodes it on start.</p>
+        <div class="actions">
+          <button class="btn btn-primary" data-copy="token" type="button">Copy token</button>
+        </div>
+        <pre><code id="out-token" class="wrap"></code></pre>
+      </div>
+
+      <div id="pane-permalink" class="pane">
+        <p class="pane-desc">Share this link to reopen the generator with these exact settings.</p>
+        <div class="actions">
+          <button class="btn btn-primary" data-copy="permalink" type="button">Copy link</button>
+        </div>
+        <pre><code id="out-permalink" class="wrap"></code></pre>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <p>Not affiliated with Anego Studios ©. Setting values based on the
+      <a href="https://wiki.vintagestory.at/" target="_blank" rel="noopener">Vintage Story Wiki</a>.</p>
+  </footer>
+
+  <script src="js/schema.js"></script>
+  <script src="js/codec.js"></script>
+  <script src="js/form.js"></script>
+  <script src="js/roles.js"></script>
+  <script src="js/output.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
