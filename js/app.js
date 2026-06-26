@@ -6,6 +6,7 @@
   const baseUrl = () => location.origin + location.pathname;
 
   let latest = null;
+  let tokenSeq = 0; // guards against stale async token results on rapid edits
 
   function readMeta() {
     const mapSizeY = parseInt($("#meta-mapsizey").value, 10);
@@ -24,8 +25,22 @@
     latest = Output.compute(values, readMeta(), Roles.getConfig(), Form.readServer());
     $("#out-snippet").textContent = latest.snippet;
     $("#out-server").textContent = latest.serverConfig;
-    $("#out-token").textContent = latest.token;
-    $("#out-permalink").textContent = latest.permalink;
+
+    // Token + permalink are encoded asynchronously; show a placeholder and fill
+    // in when ready, ignoring results from edits that were since superseded.
+    latest.token = "";
+    latest.permalink = "";
+    $("#out-token").textContent = "…";
+    $("#out-permalink").textContent = "…";
+    const seq = ++tokenSeq;
+    Codec.encode(latest.payload).then((token) => {
+      if (seq !== tokenSeq) return;
+      latest.token = token;
+      latest.permalink = latest.baseUrl + "#c=" + token;
+      $("#out-token").textContent = latest.token;
+      $("#out-permalink").textContent = latest.permalink;
+    });
+
     const count = Object.keys(latest.attributes).length;
     $("#out-count").textContent =
       `${count} setting${count === 1 ? "" : "s"} ${readMeta().includeAll ? "total" : "changed from default"}`;
@@ -45,11 +60,11 @@
     return values;
   }
 
-  function loadFromHash() {
+  async function loadFromHash() {
     const m = location.hash.match(/[#&]c=([^&]+)/);
     if (!m) return false;
     try {
-      const payload = Codec.decode(decodeURIComponent(m[1]));
+      const payload = await Codec.decode(decodeURIComponent(m[1]));
       Form.write(coerceAttrs(payload.worldConfiguration || {}));
       if (payload.server) Form.writeServer(payload.server);
       if (payload.roles) {
@@ -225,7 +240,7 @@
     });
   }
 
-  function init() {
+  async function init() {
     Form.build($("#form"), $("#server"), recompute);
     Roles.build($("#roles"), recompute);
     // Nav order mirrors the on-screen form order: meta first, then schema
@@ -257,7 +272,7 @@
     setupActions();
     setupBurger();
 
-    loadFromHash();
+    await loadFromHash();
     playstylePrev = $("#meta-playstyle").value; // sync after a permalink load
     recompute();
   }

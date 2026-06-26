@@ -88,10 +88,9 @@ const Output = (() => {
       payload.roles = rolesCfg.roles;
       payload.defaultRoleCode = rolesCfg.defaultRoleCode;
     }
-    const token = Codec.encode(payload);
-    const permalink = opts.baseUrl + "#c=" + token;
-
-    return { attributes: attrs, snippet, serverConfig, token, permalink };
+    // The token is encoded asynchronously by the caller (Compression Streams
+    // API is promise-based); hand back the payload + base URL to build it.
+    return { attributes: attrs, snippet, serverConfig, payload, baseUrl: opts.baseUrl };
   }
 
   return { compute, buildAttributes };
