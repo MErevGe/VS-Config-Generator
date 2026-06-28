@@ -30,7 +30,7 @@ jobs:
 
       # No build step — the site is plain static files served from the repo root.
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: .
 
