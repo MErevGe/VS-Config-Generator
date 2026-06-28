@@ -25,7 +25,8 @@ Pages — no backend, no build step.
   1. **Snippet** — the `worldConfiguration` object to paste into your world config.
   2. **serverconfig.json** — a ready-to-merge block (server settings + `WorldConfig`,
      plus `Roles`/`DefaultRoleCode` when customised).
-  3. **Token** — a self-contained `v2.<base64url>` string carrying the full config.
+  3. **Token** — a self-contained, DEFLATE-compressed `v3.<base64url>` string
+     carrying the full config.
   4. **Permalink** — a link that reopens the generator with the same settings.
 - Copy to clipboard, download as a file, reset to defaults.
 - Snippet / serverconfig honour a "changes only" vs "include all" toggle; the
@@ -38,8 +39,14 @@ The token is fully self-contained, so a server can rebuild the config without an
 download:
 
 ```
-v2.<base64url( JSON.stringify(payload) )>      // no "=" padding
+v3.<base64url( deflate-raw( JSON.stringify(payload) ) )>   // current, compressed
+v2.<base64url( JSON.stringify(payload) )>                  // legacy, uncompressed
 ```
+
+`v3` compresses the payload with **raw DEFLATE** (via the browser's Compression
+Streams API), shrinking the repetitive world config by ~55–70%. `base64url` is
+URL-safe (`-_` instead of `+/`) with no `=` padding. Both versions are still
+decoded, so older `v2` tokens and permalinks keep working.
 
 ```json
 {
@@ -53,18 +60,11 @@ v2.<base64url( JSON.stringify(payload) )>      // no "=" padding
 
 `worldConfiguration` is always full (string values, as `serverconfig.json` expects);
 `server`, `roles` and `defaultRoleCode` are present only when changed from default.
-Decoding needs only base64 + JSON. This is meant for the companion
+Decoding a `v3` token needs base64 + raw inflate + JSON (e.g. Python stdlib
+`zlib.decompress(data, -15)`; note plain `gzip`/`unzip` won't work — raw DEFLATE
+has no header); `v2` needs only base64 + JSON. This is meant for the companion
 [VintageStory-Server](https://github.com/MErevGe/VintageStory-Server) project, which
 can read the token from a compose variable and apply it at container start.
-
-## Local use
-
-It's a static site — just open `index.html` in a browser (works over `file://`),
-or serve it:
-
-```bash
-python3 -m http.server 8000   # then visit http://localhost:8000
-```
 
 ## Project layout
 
@@ -79,13 +79,6 @@ js/output.js            Builds snippet / serverconfig.json / token / permalink
 js/app.js               Init, state, events, permalink loading
 .github/workflows/      GitHub Pages deploy workflow
 ```
-
-## Deployment (GitHub Pages)
-
-1. Push to the `main` branch.
-2. In the repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. The included workflow ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml))
-   publishes the site on every push to `main`.
 
 ## Notes & accuracy
 
