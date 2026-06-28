@@ -1,0 +1,40 @@
+name: Bug report
+description: Something in the generator does not work as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What did you click/enter to trigger it?
+    validations:
+      required: false
+  - type: input
+    id: token
+    attributes:
+      label: Generated token (optional)
+      description: If the issue relates to a generated token, paste it here. It contains no secrets.
+    validations:
+      required: false
+  - type: input
+    id: env
+    attributes:
+      label: Browser & OS
+      placeholder: "Firefox 140 on Linux"
+    validations:
+      required: false
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors
+      description: Open the browser dev tools (F12) → Console and paste any errors.
+      render: shell
+    validations:
+      required: false
